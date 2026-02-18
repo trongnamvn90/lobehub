@@ -12,7 +12,7 @@ export const defaultClients: ClientMetadata[] = [
   {
     application_type: 'web',
     client_id: 'lobehub-desktop',
-    client_name: 'LobeHub Desktop',
+    client_name: 'Tiny Hive Desktop',
     // Only supports authorization code flow
     grant_types: ['authorization_code', 'refresh_token'],
 
@@ -41,7 +41,7 @@ export const defaultClients: ClientMetadata[] = [
   {
     application_type: 'native', // Mobile uses native type
     client_id: 'lobehub-mobile',
-    client_name: 'LobeHub Mobile',
+    client_name: 'Tiny Hive Mobile',
     // Supports authorization code flow and refresh token
     grant_types: ['authorization_code', 'refresh_token'],
     logo_uri: '/icons/tiny-hive-logo.png',
@@ -65,7 +65,7 @@ export const defaultClients: ClientMetadata[] = [
   {
     application_type: 'web',
     client_id: 'lobehub-market',
-    client_name: 'LobeHub Marketplace',
+    client_name: 'Tiny Hive Marketplace',
     grant_types: ['authorization_code', 'refresh_token'],
     logo_uri: '/icons/tiny-hive-logo.png',
     post_logout_redirect_uris: [

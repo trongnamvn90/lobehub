@@ -27,7 +27,7 @@ const Preview = memo<FieldType & { title?: string }>(
       agentSelectors.currentAgentBackgroundColor(s),
     ]);
 
-    const displayTitle = isInbox ? 'Lobe AI' : title;
+    const displayTitle = isInbox ? 'Tiny Hive' : title;
 
     return (
       <div

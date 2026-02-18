@@ -12,7 +12,7 @@ import { formatDescLength, formatTitleLength } from '@/utils/genOG';
 
 export class Meta {
   public generate({
-    description = 'LobeChat offers you the best ChatGPT, OLLaMA, Gemini, Claude WebUI user experience',
+    description = 'Tiny Hive — your private AI chat platform',
     title,
     image = OG_URL,
     url,
@@ -91,7 +91,7 @@ export class Meta {
       card: 'summary_large_image',
       description,
       images: [image],
-      site: isCustomORG ? `@${ORG_NAME}` : '@lobehub',
+      site: isCustomORG ? `@${ORG_NAME}` : '@TinyHive',
       title,
       url,
     };

@@ -27,7 +27,7 @@ export const AUTHOR_LIST = {
   lobehub: {
     avatar: 'https://avatars.githubusercontent.com/u/131470832?v=4',
     desc: 'Official Account',
-    name: 'LobeHub',
+    name: 'Tiny Hive',
     url: 'https://github.com/lobehub',
   },
 };
@@ -87,7 +87,7 @@ export class Ld {
     return {
       '@id': this.getId(OFFICIAL_URL, '#organization'),
       '@type': 'Organization',
-      'alternateName': 'LobeHub',
+      'alternateName': 'Tiny Hive',
       'contactPoint': {
         '@type': 'ContactPoint',
         'contactType': 'customer support',
@@ -95,7 +95,7 @@ export class Ld {
       },
       'description':
         'Agent teammates that grow with you\n' +
-        'LobeHub is a work-and-lifestyle space to find, build, and collaborate with agent teams that grow with you.',
+        'Tiny Hive is your private AI chat platform — self-hosted, multi-model, and always yours.',
       'email': BRANDING_EMAIL.business,
       'founders': [this.getAuthors(['arvinxx']), this.getAuthors(['canisminor'])],
       'image': urlJoin(OFFICIAL_SITE, '/icon-512x512.png'),

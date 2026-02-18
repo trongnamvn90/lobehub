@@ -11,6 +11,19 @@ export default {
   'import.incompatible.description':
     'This file was exported from a higher version. Please try upgrading to the latest version and then re-importing.',
   'import.incompatible.title': 'Current application does not support importing this file',
+  'inviteCode.continue': 'Continue',
+  'inviteCode.currentEmail': 'Current account: {{email}}',
+  'inviteCode.desc':
+    'An invite code is required to access Tiny Hive. Please enter a valid invite code to continue.',
+  'inviteCode.friends': 'Ask a friend',
+  'inviteCode.joinUsOn': 'Join us on',
+  'inviteCode.lookingForInvite': 'Looking for an invite?',
+  'inviteCode.notYou': 'Not you?',
+  'inviteCode.openingInStages': 'is opening in stages.',
+  'inviteCode.placeholder': 'Invite code or link',
+  'inviteCode.pleaseEnterCode': 'Enter your invite code to continue.',
+  'inviteCode.switchAccount': 'Switch account',
+  'inviteCode.title': "You're Almost In",
   'loginRequired.desc': 'You will be redirected to the login page shortly',
   'loginRequired.title': 'Please log in to use this feature',
   'notFound.backHome': 'Back to Home',
@@ -87,7 +100,7 @@ export default {
   'response.524':
     'We apologize, the server timed out while waiting for a response, possibly due to a slow reply. Please try again later.',
   'response.AgentRuntimeError':
-    'Lobe language model runtime execution error. Please troubleshoot or retry based on the following information.',
+    'Language model runtime execution error. Please troubleshoot or retry based on the following information.',
   'response.ComfyUIBizError':
     'An error occurred while requesting the ComfyUI service. Please troubleshoot using the information below or try again.',
   'response.ComfyUIEmptyResult':
