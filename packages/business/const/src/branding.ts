@@ -9,19 +9,19 @@ export const BRANDING_LOGO_URL = '/icons/tiny-hive-logo.png';
 export const ORG_NAME = 'Tiny Hive';
 
 export const BRANDING_URL = {
-  help: undefined,
-  privacy: undefined,
-  subscription: undefined,
-  support: undefined,
-  terms: undefined,
+  help: '' as string,
+  privacy: '' as string,
+  subscription: '' as string,
+  support: '' as string,
+  terms: '' as string,
 };
 
 export const SOCIAL_URL = {
-  discord: undefined,
-  github: undefined,
-  medium: undefined,
-  x: undefined,
-  youtube: undefined,
+  discord: '' as string,
+  github: '' as string,
+  medium: '' as string,
+  x: '' as string,
+  youtube: '' as string,
 };
 
 export const FILE_URL = {
