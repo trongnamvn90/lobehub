@@ -16,7 +16,7 @@ export const defaultClients: ClientMetadata[] = [
     // Only supports authorization code flow
     grant_types: ['authorization_code', 'refresh_token'],
 
-    logo_uri: 'https://hub-apac-1.lobeobjects.space/lobehub-desktop-icon.png',
+    logo_uri: '/icons/tiny-hive-logo.png',
 
     post_logout_redirect_uris: [
       // Dynamically construct web page callback URL
@@ -44,7 +44,7 @@ export const defaultClients: ClientMetadata[] = [
     client_name: 'LobeHub Mobile',
     // Supports authorization code flow and refresh token
     grant_types: ['authorization_code', 'refresh_token'],
-    logo_uri: 'https://hub-apac-1.lobeobjects.space/docs/73f69adfa1b802a0e250f6ff9d62f70b.png',
+    logo_uri: '/icons/tiny-hive-logo.png',
     // Mobile does not need post_logout_redirect_uris as logout is typically handled within the app
     post_logout_redirect_uris: [],
     // Mobile uses custom URL Scheme
@@ -67,7 +67,7 @@ export const defaultClients: ClientMetadata[] = [
     client_id: 'lobehub-market',
     client_name: 'LobeHub Marketplace',
     grant_types: ['authorization_code', 'refresh_token'],
-    logo_uri: 'https://hub-apac-1.lobeobjects.space/lobehub-desktop-icon.png',
+    logo_uri: '/icons/tiny-hive-logo.png',
     post_logout_redirect_uris: [
       urlJoin(marketBaseUrl!, '/lobehub-oidc/logout'),
       'http://localhost:8787/lobehub-oidc/logout',
