@@ -89,7 +89,7 @@ describe('Metadata', () => {
         title: 'Twitter Title',
         description: 'Twitter description',
         images: ['https://twitter-image.com'],
-        site: '@lobehub',
+        site: '@Tiny Hive',
         url: 'https://example.com/twitter',
       });
     });
