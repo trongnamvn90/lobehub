@@ -95,6 +95,7 @@ export interface AgentRuntimeServiceOptions {
    * Can pass InMemoryStreamEventManager in test environments
    */
   streamEventManager?: IStreamEventManager;
+  userEmail?: string;
 }
 
 /**
@@ -129,6 +130,7 @@ export class AgentRuntimeService {
     return urlJoin(baseUrl, '/api/agent');
   }
   private serverDB: LobeChatDatabase;
+  private userEmail?: string;
   private userId: string;
   private messageModel: MessageModel;
 
@@ -145,6 +147,7 @@ export class AgentRuntimeService {
     this.queueService =
       options?.queueService === null ? null : (options?.queueService ?? new QueueService());
     this.serverDB = db;
+    this.userEmail = options?.userEmail;
     this.userId = userId;
     this.messageModel = new MessageModel(db, this.userId);
 
@@ -1051,6 +1054,7 @@ export class AgentRuntimeService {
       streamManager: this.streamManager,
       toolExecutionService: this.toolExecutionService,
       topicId: metadata?.topicId,
+      userEmail: this.userEmail,
       userId: metadata?.userId,
     };
 
