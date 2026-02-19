@@ -237,8 +237,8 @@ const aiAgentProcedure = authedProcedure.use(serverDatabase).use(async (opts) =>
 
   return opts.next({
     ctx: {
-      agentRuntimeService: new AgentRuntimeService(ctx.serverDB, ctx.userId),
-      aiAgentService: new AiAgentService(ctx.serverDB, ctx.userId),
+      agentRuntimeService: new AgentRuntimeService(ctx.serverDB, ctx.userId, { userEmail: ctx.userEmail || undefined }),
+      aiAgentService: new AiAgentService(ctx.serverDB, ctx.userId, { userEmail: ctx.userEmail || undefined }),
       aiChatService: new AiChatService(ctx.serverDB, ctx.userId),
       messageModel: new MessageModel(ctx.serverDB, ctx.userId),
       threadModel: new ThreadModel(ctx.serverDB, ctx.userId),

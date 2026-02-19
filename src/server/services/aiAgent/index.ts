@@ -159,7 +159,7 @@ export class AiAgentService {
   private readonly marketService: MarketService;
   private readonly klavisService: KlavisService;
 
-  constructor(db: LobeChatDatabase, userId: string) {
+  constructor(db: LobeChatDatabase, userId: string, options?: { userEmail?: string }) {
     this.userId = userId;
     this.db = db;
     this.agentModel = new AgentModel(db, userId);
@@ -168,7 +168,7 @@ export class AiAgentService {
     this.pluginModel = new PluginModel(db, userId);
     this.threadModel = new ThreadModel(db, userId);
     this.topicModel = new TopicModel(db, userId);
-    this.agentRuntimeService = new AgentRuntimeService(db, userId);
+    this.agentRuntimeService = new AgentRuntimeService(db, userId, { userEmail: options?.userEmail });
     this.marketService = new MarketService({ userInfo: { userId } });
     this.klavisService = new KlavisService({ db, userId });
   }

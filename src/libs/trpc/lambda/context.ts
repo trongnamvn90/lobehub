@@ -44,6 +44,7 @@ export interface AuthContext {
   resHeaders?: Headers;
   traceContext?: OtContext;
   userAgent?: string;
+  userEmail?: string | null;
   userId?: string | null;
 }
 
@@ -58,6 +59,7 @@ export const createContextInner = async (params?: {
   oidcAuth?: OIDCAuth | null;
   traceContext?: OtContext;
   userAgent?: string;
+  userEmail?: string | null;
   userId?: string | null;
 }): Promise<AuthContext> => {
   log('createContextInner called with params: %O', params);
@@ -71,6 +73,7 @@ export const createContextInner = async (params?: {
     resHeaders: responseHeaders,
     traceContext: params?.traceContext,
     userAgent: params?.userAgent,
+    userEmail: params?.userEmail,
     userId: params?.userId,
   };
 };
@@ -174,6 +177,7 @@ export const createLambdaContext = async (request: NextRequest): Promise<LambdaC
     return createContextInner({
       ...commonContext,
       traceContext,
+      userEmail: session?.user?.email,
       userId,
     });
   } catch (e) {

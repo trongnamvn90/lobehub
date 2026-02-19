@@ -13,7 +13,7 @@ import { getTracePayload } from '@/utils/trace';
 export const maxDuration = 300;
 
 export const POST = checkAuth(
-  async (req: Request, { params, userId, serverDB, createRuntime, jwtPayload }) => {
+  async (req: Request, { params, userId, userEmail, serverDB, createRuntime, jwtPayload }) => {
     const provider = (await params)!.provider!;
 
     try {
@@ -41,6 +41,7 @@ export const POST = checkAuth(
 
       return await modelRuntime.chat(data, {
         user: userId,
+        ...(userEmail ? { requestHeaders: { 'X-User-Email': userEmail } } : {}),
         ...traceOptions,
         signal: req.signal,
       });

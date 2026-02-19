@@ -52,6 +52,7 @@ export interface RuntimeExecutorContext {
   streamManager: IStreamEventManager;
   toolExecutionService: ToolExecutionService;
   topicId?: string;
+  userEmail?: string;
   userId?: string;
   userTimezone?: string;
 }
@@ -403,6 +404,7 @@ export const createRuntimeExecutors = (
           },
         },
         user: ctx.userId,
+        ...(ctx.userEmail ? { requestHeaders: { 'X-User-Email': ctx.userEmail } } : {}),
       });
 
       // Consume stream to ensure all callbacks complete execution
