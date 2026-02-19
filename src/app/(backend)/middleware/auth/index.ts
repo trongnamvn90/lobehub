@@ -23,6 +23,7 @@ export type RequestHandler = (
   options: RequestOptions & {
     jwtPayload: ClientSecretPayload;
     serverDB: LobeChatDatabase;
+    userEmail?: string;
     userId: string;
   },
 ) => Promise<Response>;
@@ -49,6 +50,7 @@ export const checkAuth =
     }
 
     let jwtPayload: ClientSecretPayload;
+    let userEmail = '';
 
     try {
       // get Authorization from header
@@ -61,6 +63,7 @@ export const checkAuth =
       });
 
       const betterAuthAuthorized = !!session?.user?.id;
+      userEmail = session?.user?.email || '';
 
       if (!authorization) throw AgentRuntimeError.createError(ChatErrorType.Unauthorized);
 
@@ -117,7 +120,7 @@ export const checkAuth =
     const extractedContext = extractTraceContext(req.headers);
 
     const res = await otContext.with(extractedContext, () =>
-      handler(clonedReq, { ...options, jwtPayload, serverDB, userId }),
+      handler(clonedReq, { ...options, jwtPayload, serverDB, userEmail, userId }),
     );
 
     // Only inject trace headers when the handler returns a Response
