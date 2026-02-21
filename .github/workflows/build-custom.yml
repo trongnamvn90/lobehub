@@ -1,11 +1,13 @@
-name: 🐝 Build Tiny Hive
+name: 🐝 Build & Push Tiny Hive
 
 on:
   push:
-    branches: [custom/per-user-quota]
+    branches: [deploy/tiny-hive]
     paths-ignore:
-      - 'docs/**'
       - '*.md'
+      - 'docs/**'
+      - '.github/**'
+      - '!.github/workflows/build-custom.yml'
   workflow_dispatch:
 
 concurrency:
@@ -14,7 +16,7 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/lobechat-custom
+  IMAGE_NAME: ${{ github.repository_owner }}/lobechat
 
 jobs:
   build:
