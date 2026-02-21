@@ -8,12 +8,14 @@ import { type ReactNode } from 'react';
 import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import BudgetWarning from '@/components/BudgetWarning';
 import { type ActionKeys } from '@/features/ChatInput';
 import { ChatInputProvider, DesktopChatInput } from '@/features/ChatInput';
 import {
   type SendButtonHandler,
   type SendButtonProps,
 } from '@/features/ChatInput/store/initialState';
+import { useBudgetWarning } from '@/hooks/useBudgetWarning';
 import { useChatStore } from '@/store/chat';
 import { fileChatSelectors, useFileStore } from '@/store/file';
 
@@ -122,9 +124,12 @@ const ChatInput = memo<ChatInputProps>(
     const contextList = useFileStore(fileChatSelectors.chatContextSelections);
     const isUploadingFiles = useFileStore(fileChatSelectors.isUploadingFiles);
 
+    // Budget warning
+    const { level: budgetLevel } = useBudgetWarning();
+
     // Computed state
     const isInputEmpty = !inputMessage.trim() && fileList.length === 0 && contextList.length === 0;
-    const disabled = isInputEmpty || isUploadingFiles || isInputLoading;
+    const disabled = isInputEmpty || isUploadingFiles || isInputLoading || budgetLevel === 'blocked';
 
     // Send handler - gets message, clears editor immediately, then sends
     const handleSend: SendButtonHandler = useCallback(
@@ -180,6 +185,7 @@ const ChatInput = memo<ChatInputProps>(
             />
           </Flexbox>
         )}
+        <BudgetWarning />
         <DesktopChatInput
           actionBarStyle={actionBarStyle}
           borderRadius={12}

@@ -1,0 +1,146 @@
+'use client';
+
+import { Flexbox } from '@lobehub/ui';
+import { Modal, Progress, Table, Tag, Typography } from 'antd';
+import { memo, useEffect } from 'react';
+import useSWR from 'swr';
+
+import { type BudgetData, type BudgetWindow } from '@/hooks/useBudgetWarning';
+
+const { Text } = Typography;
+
+interface HistoryItem {
+  cost: number;
+  model: string;
+  time: string;
+  tokens: number;
+}
+
+interface UsageWithHistory extends BudgetData {
+  history: HistoryItem[] | null;
+}
+
+function progressColor(pct: number) {
+  if (pct >= 100) return '#991b1b';
+  if (pct >= 90) return '#ef4444';
+  if (pct >= 75) return '#eab308';
+  return '#22c55e';
+}
+
+const WindowBar = memo<{ w: BudgetWindow }>(({ w }) => {
+  const resetDate = new Date(w.reset_at);
+  const now = new Date();
+  const diffMs = resetDate.getTime() - now.getTime();
+  let resetLabel = 'now';
+  if (diffMs > 0) {
+    const h = Math.floor(diffMs / 3_600_000);
+    const m = Math.floor((diffMs % 3_600_000) / 60_000);
+    resetLabel = h > 24 ? resetDate.toLocaleDateString() : h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+
+  return (
+    <Flexbox gap={4} style={{ marginBottom: 16 }}>
+      <Flexbox align="center" horizontal justify="space-between">
+        <Text strong>{w.window} window</Text>
+        <Text type="secondary">
+          ${w.spent.toFixed(2)} / ${w.limit.toFixed(2)}
+        </Text>
+      </Flexbox>
+      <Progress
+        percent={Math.min(w.pct, 100)}
+        showInfo={false}
+        strokeColor={progressColor(w.pct)}
+      />
+      <Flexbox align="center" horizontal justify="space-between">
+        <Text type="secondary">Remaining: ${w.remaining.toFixed(2)}</Text>
+        <Text type="secondary">Resets in {resetLabel}</Text>
+      </Flexbox>
+    </Flexbox>
+  );
+});
+
+const historyColumns = [
+  {
+    dataIndex: 'time',
+    key: 'time',
+    render: (v: string) => {
+      const d = new Date(v);
+      return `${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${d.toLocaleDateString([], { day: 'numeric', month: 'short' })}`;
+    },
+    title: 'Time',
+    width: 140,
+  },
+  { dataIndex: 'model', key: 'model', title: 'Model' },
+  {
+    dataIndex: 'cost',
+    key: 'cost',
+    render: (v: number) => `$${v < 0.01 ? v.toFixed(6) : v.toFixed(4)}`,
+    title: 'Cost',
+    width: 100,
+  },
+  { dataIndex: 'tokens', key: 'tokens', title: 'Tokens', width: 80 },
+];
+
+const UsagePanel = memo<{ onClose: () => void; open: boolean }>(({ open, onClose }) => {
+  const { data, mutate } = useSWR<UsageWithHistory>(
+    open ? 'usage-panel' : null,
+    async () => {
+      const res = await fetch('/api/budget?history=1');
+      if (!res.ok) return undefined;
+      return res.json();
+    },
+    { refreshInterval: 30_000, revalidateOnFocus: true },
+  );
+
+  useEffect(() => {
+    if (open) mutate();
+  }, [open]);
+
+  return (
+    <Modal
+      footer={null}
+      open={open}
+      title={
+        <Flexbox align="center" gap={8} horizontal>
+          🐝 Usage
+          {data?.subscription && (
+            <Tag color="gold" style={{ marginLeft: 4 }}>
+              {data.subscription}
+            </Tag>
+          )}
+        </Flexbox>
+      }
+      width={520}
+      onCancel={onClose}
+    >
+      <Flexbox gap={8} style={{ maxHeight: 480, overflowY: 'auto', padding: '8px 0' }}>
+        {data?.blocked && (
+          <Tag color="error" style={{ fontSize: 14, marginBottom: 8, padding: '4px 12px' }}>
+            ⛔ Budget Exceeded
+          </Tag>
+        )}
+
+        {data?.windows?.map((w) => <WindowBar key={w.window} w={w} />)}
+
+        {data?.history && data.history.length > 0 && (
+          <>
+            <Text strong style={{ marginTop: 8 }}>
+              Recent Activity
+            </Text>
+            <Table
+              columns={historyColumns}
+              dataSource={data.history.map((h, i) => ({ ...h, key: i }))}
+              pagination={false}
+              size="small"
+            />
+          </>
+        )}
+      </Flexbox>
+    </Modal>
+  );
+});
+
+WindowBar.displayName = 'WindowBar';
+UsagePanel.displayName = 'UsagePanel';
+
+export default UsagePanel;
