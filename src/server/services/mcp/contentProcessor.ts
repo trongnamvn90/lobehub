@@ -64,7 +64,7 @@ export const processContentBlocks = async (
 /**
  * Convert content blocks to string
  * - text: Extract text field
- * - image/audio: Extract data field (usually the proxy URL after upload)
+ * - image/audio: Extract data field (the proxy URL after upload, already absolute)
  * - others: Return empty string
  */
 export const contentBlocksToString = (blocks: ToolCallContent[] | null | undefined): string => {
