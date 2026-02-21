@@ -2,6 +2,7 @@ import { Flexbox } from '@lobehub/ui';
 import isEqual from 'fast-deep-equal';
 import { memo, useMemo } from 'react';
 
+import BudgetBadge from '../ActionBar/Budget';
 import { type ActionKey } from '../ActionBar/config';
 import { actionMap } from '../ActionBar/config';
 import { useChatInputStore } from '../store';
@@ -27,6 +28,7 @@ const SendArea = memo(() => {
     <Flexbox horizontal align={'center'} flex={'none'} gap={6}>
       {allowExpand && <ExpandButton />}
       {items}
+      <BudgetBadge />
       <SendButton />
     </Flexbox>
   );

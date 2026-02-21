@@ -11,7 +11,11 @@ const BudgetWarning = memo(() => {
   if (level === 'ok' || !data) return null;
 
   const summary = data.windows
-    .map((w) => `${w.window}: $${w.spent.toFixed(2)}/$${w.limit.toFixed(2)} (${w.pct.toFixed(0)}%)`)
+    .map((w) =>
+      data.hide_cost
+        ? `${w.window}: ${w.pct.toFixed(0)}%`
+        : `${w.window}: $${w.spent.toFixed(2)}/$${w.limit.toFixed(2)} (${w.pct.toFixed(0)}%)`,
+    )
     .join(' | ');
 
   const typeMap = {
