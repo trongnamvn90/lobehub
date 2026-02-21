@@ -1,6 +1,6 @@
 import { ENABLE_BUSINESS_FEATURES } from '@lobechat/business-const';
 import { Flexbox } from '@lobehub/ui';
-import { type FC } from 'react';
+import { type FC, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { navigateToDesktopOnboarding } from '@/app/[variants]/(desktop)/desktop-onboarding/navigation';
@@ -9,6 +9,7 @@ import { DesktopOnboardingScreen } from '@/app/[variants]/(desktop)/desktop-onbo
 import BusinessPanelContent from '@/business/client/features/User/BusinessPanelContent';
 import BrandWatermark from '@/components/BrandWatermark';
 import Menu from '@/components/Menu';
+import UsagePanel from '@/components/UsagePanel';
 import { isDesktop } from '@/const/version';
 import { useUserStore } from '@/store/user';
 import { authSelectors } from '@/store/user/selectors';
@@ -23,6 +24,7 @@ const PanelContent: FC<{ closePopover: () => void }> = ({ closePopover }) => {
   const isLoginWithAuth = useUserStore(authSelectors.isLoginWithAuth);
   const [openSignIn, signOut] = useUserStore((s) => [s.openLogin, s.logout]);
   const { mainItems, logoutItems } = useMenu();
+  const [usageOpen, setUsageOpen] = useState(false);
 
   const handleSignIn = () => {
     openSignIn();
@@ -64,12 +66,22 @@ const PanelContent: FC<{ closePopover: () => void }> = ({ closePopover }) => {
         <UserLoginOrSignup onClick={handleSignIn} />
       )}
 
-      <Menu items={mainItems} onClick={closePopover} />
+      <Menu
+        items={mainItems}
+        onClick={(info) => {
+          if (info.key === 'usage') {
+            setUsageOpen(true);
+            return;
+          }
+          closePopover();
+        }}
+      />
       <Menu items={logoutItems} onClick={handleSignOut} />
       <Flexbox horizontal gap={4} justify={'space-between'} style={{ padding: '6px 8px 6px 16px' }}>
         <BrandWatermark />
         <LangButton placement={'right' as any} />
       </Flexbox>
+      <UsagePanel open={usageOpen} onClose={() => setUsageOpen(false)} />
     </Flexbox>
   );
 };
