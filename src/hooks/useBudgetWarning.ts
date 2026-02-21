@@ -17,6 +17,7 @@ export interface BudgetWindow {
 export interface BudgetData {
   blocked: boolean;
   email: string;
+  hide_cost?: boolean;
   subscription: string;
   windows: BudgetWindow[];
 }

@@ -27,7 +27,7 @@ function progressColor(pct: number) {
   return '#22c55e';
 }
 
-const WindowBar = memo<{ w: BudgetWindow }>(({ w }) => {
+const WindowBar = memo<{ hideCost?: boolean; w: BudgetWindow }>(({ w, hideCost }) => {
   const resetDate = new Date(w.reset_at);
   const now = new Date();
   const diffMs = resetDate.getTime() - now.getTime();
@@ -43,7 +43,7 @@ const WindowBar = memo<{ w: BudgetWindow }>(({ w }) => {
       <Flexbox align="center" horizontal justify="space-between">
         <Text strong>{w.window} window</Text>
         <Text type="secondary">
-          ${w.spent.toFixed(2)} / ${w.limit.toFixed(2)}
+          {hideCost ? `${w.pct.toFixed(0)}%` : `$${w.spent.toFixed(2)} / $${w.limit.toFixed(2)}`}
         </Text>
       </Flexbox>
       <Progress
@@ -52,14 +52,14 @@ const WindowBar = memo<{ w: BudgetWindow }>(({ w }) => {
         strokeColor={progressColor(w.pct)}
       />
       <Flexbox align="center" horizontal justify="space-between">
-        <Text type="secondary">Remaining: ${w.remaining.toFixed(2)}</Text>
+        {!hideCost && <Text type="secondary">Remaining: ${w.remaining.toFixed(2)}</Text>}
         <Text type="secondary">Resets in {resetLabel}</Text>
       </Flexbox>
     </Flexbox>
   );
 });
 
-const historyColumns = [
+const baseColumns = [
   {
     dataIndex: 'time',
     key: 'time',
@@ -71,15 +71,21 @@ const historyColumns = [
     width: 140,
   },
   { dataIndex: 'model', key: 'model', title: 'Model' },
-  {
-    dataIndex: 'cost',
-    key: 'cost',
-    render: (v: number) => `$${v < 0.01 ? v.toFixed(6) : v.toFixed(4)}`,
-    title: 'Cost',
-    width: 100,
-  },
-  { dataIndex: 'tokens', key: 'tokens', title: 'Tokens', width: 80 },
 ];
+
+const costColumn = {
+  dataIndex: 'cost',
+  key: 'cost',
+  render: (v: number) => `$${v < 0.01 ? v.toFixed(6) : v.toFixed(4)}`,
+  title: 'Cost',
+  width: 100,
+};
+
+const tokensColumn = { dataIndex: 'tokens', key: 'tokens', title: 'Tokens', width: 80 };
+
+function getHistoryColumns(hideCost?: boolean) {
+  return hideCost ? [...baseColumns, tokensColumn] : [...baseColumns, costColumn, tokensColumn];
+}
 
 const UsagePanel = memo<{ onClose: () => void; open: boolean }>(({ open, onClose }) => {
   const { data, mutate } = useSWR<UsageWithHistory>(
@@ -120,7 +126,9 @@ const UsagePanel = memo<{ onClose: () => void; open: boolean }>(({ open, onClose
           </Tag>
         )}
 
-        {data?.windows?.map((w) => <WindowBar key={w.window} w={w} />)}
+        {data?.windows?.map((w) => (
+          <WindowBar hideCost={data.hide_cost} key={w.window} w={w} />
+        ))}
 
         {data?.history && data.history.length > 0 && (
           <>
@@ -128,7 +136,7 @@ const UsagePanel = memo<{ onClose: () => void; open: boolean }>(({ open, onClose
               Recent Activity
             </Text>
             <Table
-              columns={historyColumns}
+              columns={getHistoryColumns(data.hide_cost)}
               dataSource={data.history.map((h, i) => ({ ...h, key: i }))}
               pagination={false}
               size="small"
