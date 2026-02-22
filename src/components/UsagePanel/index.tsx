@@ -27,17 +27,22 @@ function progressColor(pct: number) {
   return '#22c55e';
 }
 
-const WindowBar = memo<{ hideCost?: boolean; w: BudgetWindow }>(({ w, hideCost }) => {
-  const resetDate = new Date(w.reset_at);
-  const now = new Date();
-  const diffMs = resetDate.getTime() - now.getTime();
-  let resetLabel = 'now';
-  if (diffMs > 0) {
-    const h = Math.floor(diffMs / 3_600_000);
-    const m = Math.floor((diffMs % 3_600_000) / 60_000);
-    resetLabel = h > 24 ? resetDate.toLocaleDateString() : h > 0 ? `${h}h ${m}m` : `${m}m`;
-  }
+function formatResetTime(iso: string): string {
+  const d = new Date(iso);
+  const diff = d.getTime() - Date.now();
+  const abs =
+    d.toLocaleDateString([], { day: 'numeric', month: 'short' }) +
+    ' ' +
+    d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (diff <= 0) return `${abs} (now)`;
+  const h = Math.floor(diff / 3_600_000);
+  const m = Math.floor((diff % 3_600_000) / 60_000);
+  const rel =
+    h > 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
+  return `${abs} (${rel})`;
+}
 
+const WindowBar = memo<{ hideCost?: boolean; w: BudgetWindow }>(({ w, hideCost }) => {
   return (
     <Flexbox gap={4} style={{ marginBottom: 16 }}>
       <Flexbox align="center" horizontal justify="space-between">
@@ -53,7 +58,7 @@ const WindowBar = memo<{ hideCost?: boolean; w: BudgetWindow }>(({ w, hideCost }
       />
       <Flexbox align="center" horizontal justify="space-between">
         {!hideCost && <Text type="secondary">Remaining: ${w.remaining.toFixed(2)}</Text>}
-        <Text type="secondary">Resets in {resetLabel}</Text>
+        <Text type="secondary">Resets: {formatResetTime(w.reset_at)}</Text>
       </Flexbox>
     </Flexbox>
   );
@@ -120,6 +125,11 @@ const UsagePanel = memo<{ onClose: () => void; open: boolean }>(({ open, onClose
       onCancel={onClose}
     >
       <Flexbox gap={8} style={{ maxHeight: 480, overflowY: 'auto', padding: '8px 0' }}>
+        {data?.valid_until && (
+          <Text style={{ marginBottom: 4 }} type="secondary">
+            📅 Subscription expires: {formatResetTime(data.valid_until)}
+          </Text>
+        )}
         {data?.blocked && (
           <Tag color="error" style={{ fontSize: 14, marginBottom: 8, padding: '4px 12px' }}>
             ⛔ Budget Exceeded

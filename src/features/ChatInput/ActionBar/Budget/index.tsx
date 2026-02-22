@@ -23,14 +23,19 @@ function progressColor(pct: number) {
   return '#22c55e';
 }
 
-function resetLabel(resetAt: string) {
-  const diff = new Date(resetAt).getTime() - Date.now();
-  if (diff <= 0) return 'now';
+function formatResetTime(iso: string): string {
+  const d = new Date(iso);
+  const diff = d.getTime() - Date.now();
+  const abs =
+    d.toLocaleDateString([], { day: 'numeric', month: 'short' }) +
+    ' ' +
+    d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (diff <= 0) return `${abs} (now)`;
   const h = Math.floor(diff / 3_600_000);
   const m = Math.floor((diff % 3_600_000) / 60_000);
-  if (h > 24) return new Date(resetAt).toLocaleDateString();
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
+  const rel =
+    h > 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
+  return `${abs} (${rel})`;
 }
 
 const WindowBar = memo<{ hideCost: boolean; w: BudgetWindow }>(({ w, hideCost }) => (
@@ -55,7 +60,7 @@ const WindowBar = memo<{ hideCost: boolean; w: BudgetWindow }>(({ w, hideCost })
     >
       {!hideCost && <span>Left: ${w.remaining.toFixed(2)}</span>}
       <span style={hideCost ? { marginLeft: 'auto' } : undefined}>
-        Resets in {resetLabel(w.reset_at)}
+        Resets: {formatResetTime(w.reset_at)}
       </span>
     </Flexbox>
   </Flexbox>
@@ -86,6 +91,11 @@ const BudgetBadge = memo(() => {
       {data.windows.map((w) => (
         <WindowBar hideCost={hideCost} key={w.window} w={w} />
       ))}
+      {data.valid_until && (
+        <span style={{ color: cssVar.colorTextDescription, fontSize: 11, marginTop: 2 }}>
+          📅 Expires: {formatResetTime(data.valid_until)}
+        </span>
+      )}
     </Flexbox>
   );
 
