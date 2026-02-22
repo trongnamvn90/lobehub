@@ -12,6 +12,7 @@ export const { POST } = serveMany(
     'process-topic': processTopicWorkflow,
   },
   {
+    baseUrl: process.env.APP_URL,
     qstashClient: new Client({
       headers: {
         ...upstashWorkflowExtraHeaders,

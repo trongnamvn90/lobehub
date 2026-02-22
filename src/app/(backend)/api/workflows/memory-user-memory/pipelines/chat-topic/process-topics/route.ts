@@ -147,6 +147,7 @@ export const { POST } = serve<MemoryExtractionPayloadInput>(
     //
     // Refer to the doc for more details:
     // https://upstash.com/docs/workflow/troubleshooting/vercel#step-2-pass-header-when-triggering
+    baseUrl: process.env.APP_URL,
     qstashClient: new Client({
       headers: {
         ...upstashWorkflowExtraHeaders,
