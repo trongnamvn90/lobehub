@@ -166,6 +166,7 @@ export const processTopicWorkflow = createWorkflow<MemoryExtractionPayloadInput,
         return 'async-task-update-failed';
       }
     },
+    baseUrl: process.env.APP_URL,
     qstashClient: new Client({
       headers: {
         ...upstashWorkflowExtraHeaders,
