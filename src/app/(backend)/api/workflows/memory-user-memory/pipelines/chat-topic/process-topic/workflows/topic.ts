@@ -34,7 +34,7 @@ const processTopicRoute = async (context: WorkflowContext<MemoryExtractionPayloa
   upstashWorkflowTracer.startActiveSpan(
     'workflow:memory-user-memory:process-topic',
     async (span) => {
-      const payload = normalizeMemoryExtractionPayload(context.requestPayload || {});
+      const payload = normalizeMemoryExtractionPayload(context.requestPayload || {}, process.env.APP_URL);
 
       span.setAttributes({
         ...buildUpstashWorkflowAttributes(context),
@@ -140,7 +140,7 @@ export const processTopicWorkflow = createWorkflow<MemoryExtractionPayloadInput,
   {
     failureFunction: async ({ context, failStatus, failResponse }) => {
       try {
-        const payload = normalizeMemoryExtractionPayload(context.requestPayload || {});
+        const payload = normalizeMemoryExtractionPayload(context.requestPayload || {}, process.env.APP_URL);
 
         const userId = payload.userId || payload.userIds?.[0];
         const topicId = payload.topicIds?.[0];
