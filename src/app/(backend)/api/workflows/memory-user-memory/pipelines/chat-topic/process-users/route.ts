@@ -18,7 +18,7 @@ const { upstashWorkflowExtraHeaders } = parseMemoryExtractionConfig();
 
 export const { POST } = serve<MemoryExtractionPayloadInput>(
   async (context) => {
-    const params = normalizeMemoryExtractionPayload(context.requestPayload || {});
+    const params = normalizeMemoryExtractionPayload(context.requestPayload || {}, process.env.APP_URL);
     if (params.sources.length === 0) {
       return { message: 'No sources provided, skip memory extraction.' };
     }

@@ -32,7 +32,7 @@ export const { POST } = serve<MemoryExtractionPayloadInput>(
     upstashWorkflowTracer.startActiveSpan(
       'workflow:memory-user-memory:process-topics',
       async (span) => {
-        const payload = normalizeMemoryExtractionPayload(context.requestPayload || {});
+        const payload = normalizeMemoryExtractionPayload(context.requestPayload || {}, process.env.APP_URL);
 
         span.setAttributes({
           ...buildUpstashWorkflowAttributes(context),

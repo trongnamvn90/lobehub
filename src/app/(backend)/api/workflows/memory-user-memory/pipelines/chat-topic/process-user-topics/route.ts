@@ -20,7 +20,7 @@ const { upstashWorkflowExtraHeaders } = parseMemoryExtractionConfig();
 
 export const { POST } = serve<MemoryExtractionPayloadInput>(
   async (context) => {
-    const params = normalizeMemoryExtractionPayload(context.requestPayload || {});
+    const params = normalizeMemoryExtractionPayload(context.requestPayload || {}, process.env.APP_URL);
     if (!params.userIds.length) {
       return { message: 'No user ids provided for topic processing.' };
     }
