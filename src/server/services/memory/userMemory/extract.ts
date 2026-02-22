@@ -2189,7 +2189,7 @@ const getWorkflowClient = () => {
   const config: ConstructorParameters<typeof Client>[0] = { token };
 
   if (process.env.QSTASH_URL) {
-    (config as Record<string, unknown>).url = process.env.QSTASH_URL;
+    (config as Record<string, unknown>).baseUrl = process.env.QSTASH_URL;
   }
 
   return new Client(config);
