@@ -14,19 +14,32 @@ export interface BudgetWindow {
   window: string;
 }
 
+export interface PAYGData {
+  balance: number;
+}
+
 export interface BudgetData {
+  billing_mode?: 'subscription' | 'payg';
   blocked: boolean;
   email: string;
   hide_cost?: boolean;
-  subscription: string;
+  payg?: PAYGData | null;
+  subscription?: string | null;
   valid_until?: string | null;
   windows: BudgetWindow[];
 }
 
 function computeLevel(data?: BudgetData): WarningLevel {
-  if (!data?.windows?.length) return 'ok';
+  if (!data) return 'ok';
+  if (data.blocked) return 'blocked';
+
+  // PAYG mode — no windows, check blocked only
+  if (data.billing_mode === 'payg') return 'ok';
+
+  // Subscription mode — check window percentages
+  if (!data.windows?.length) return 'ok';
   const maxPct = Math.max(...data.windows.map((w) => w.pct));
-  if (maxPct >= 100 || data.blocked) return 'blocked';
+  if (maxPct >= 100) return 'blocked';
   if (maxPct >= 90) return 'critical';
   if (maxPct >= 75) return 'warning';
   return 'ok';
