@@ -10,6 +10,7 @@ import { type BudgetData, type BudgetWindow } from '@/hooks/useBudgetWarning';
 const { Text } = Typography;
 
 interface HistoryItem {
+  billing_source?: string;
   cost: number;
   model: string;
   time: string;
@@ -42,6 +43,10 @@ function formatResetTime(iso: string): string {
   return `${abs} (${rel})`;
 }
 
+function fmtCost(v: number) {
+  return `$${Math.abs(v) < 0.01 ? v.toFixed(6) : v.toFixed(2)}`;
+}
+
 const WindowBar = memo<{ hideCost?: boolean; w: BudgetWindow }>(({ w, hideCost }) => {
   return (
     <Flexbox gap={4} style={{ marginBottom: 16 }}>
@@ -63,6 +68,45 @@ const WindowBar = memo<{ hideCost?: boolean; w: BudgetWindow }>(({ w, hideCost }
     </Flexbox>
   );
 });
+
+const PAYGCard = memo<{ balance: number; blocked: boolean; hideCost?: boolean }>(
+  ({ balance, blocked, hideCost }) => {
+    const balanceColor = balance <= 0 ? '#ef4444' : balance < 2 ? '#eab308' : '#22c55e';
+    return (
+      <Flexbox
+        gap={8}
+        style={{
+          background: 'rgba(59, 130, 246, 0.08)',
+          borderRadius: 12,
+          marginBottom: 16,
+          padding: 16,
+        }}
+      >
+        <Flexbox align="center" horizontal justify="space-between">
+          <Text strong>💳 Available Credit</Text>
+          <Tag color="blue" style={{ margin: 0 }}>
+            Pay-As-You-Go
+          </Tag>
+        </Flexbox>
+        {blocked && (
+          <Tag color="error" style={{ fontSize: 13, padding: '4px 12px', width: 'fit-content' }}>
+            ⛔ Credit Exhausted
+          </Tag>
+        )}
+        <span
+          style={{
+            color: balanceColor,
+            fontFamily: 'monospace',
+            fontSize: 28,
+            fontWeight: 700,
+          }}
+        >
+          {fmtCost(balance)}
+        </span>
+      </Flexbox>
+    );
+  },
+);
 
 const baseColumns = [
   {
@@ -107,17 +151,25 @@ const UsagePanel = memo<{ onClose: () => void; open: boolean }>(({ open, onClose
     if (open) mutate();
   }, [open]);
 
+  const isPAYG = data?.billing_mode === 'payg';
+
   return (
     <Modal
       footer={null}
       open={open}
       title={
         <Flexbox align="center" gap={8} horizontal>
-          🐝 Usage
-          {data?.subscription && (
-            <Tag color="gold" style={{ marginLeft: 4 }}>
-              {data.subscription}
+          {isPAYG ? '💳 Usage' : '🐝 Usage'}
+          {isPAYG ? (
+            <Tag color="blue" style={{ marginLeft: 4 }}>
+              PAYG
             </Tag>
+          ) : (
+            data?.subscription && (
+              <Tag color="gold" style={{ marginLeft: 4 }}>
+                {data.subscription}
+              </Tag>
+            )
           )}
         </Flexbox>
       }
@@ -125,20 +177,29 @@ const UsagePanel = memo<{ onClose: () => void; open: boolean }>(({ open, onClose
       onCancel={onClose}
     >
       <Flexbox gap={8} style={{ maxHeight: 480, overflowY: 'auto', padding: '8px 0' }}>
-        {data?.valid_until && (
-          <Text style={{ marginBottom: 4 }} type="secondary">
-            📅 Subscription expires: {formatResetTime(data.valid_until)}
-          </Text>
+        {isPAYG && data?.payg ? (
+          <PAYGCard
+            balance={data.payg.balance}
+            blocked={!!data.blocked}
+            hideCost={data.hide_cost}
+          />
+        ) : (
+          <>
+            {data?.valid_until && (
+              <Text style={{ marginBottom: 4 }} type="secondary">
+                📅 Subscription expires: {formatResetTime(data.valid_until)}
+              </Text>
+            )}
+            {data?.blocked && (
+              <Tag color="error" style={{ fontSize: 14, marginBottom: 8, padding: '4px 12px' }}>
+                ⛔ Budget Exceeded
+              </Tag>
+            )}
+            {data?.windows?.map((w) => (
+              <WindowBar hideCost={data.hide_cost} key={w.window} w={w} />
+            ))}
+          </>
         )}
-        {data?.blocked && (
-          <Tag color="error" style={{ fontSize: 14, marginBottom: 8, padding: '4px 12px' }}>
-            ⛔ Budget Exceeded
-          </Tag>
-        )}
-
-        {data?.windows?.map((w) => (
-          <WindowBar hideCost={data.hide_cost} key={w.window} w={w} />
-        ))}
 
         {data?.history && data.history.length > 0 && (
           <>
@@ -159,6 +220,7 @@ const UsagePanel = memo<{ onClose: () => void; open: boolean }>(({ open, onClose
 });
 
 WindowBar.displayName = 'WindowBar';
+PAYGCard.displayName = 'PAYGCard';
 UsagePanel.displayName = 'UsagePanel';
 
 export default UsagePanel;

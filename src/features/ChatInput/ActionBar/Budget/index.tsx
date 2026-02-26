@@ -16,6 +16,13 @@ function badgeColor(pct: number, blocked: boolean) {
   return '#22c55e';
 }
 
+function paygBadgeColor(balance: number, blocked: boolean) {
+  if (blocked) return '#991b1b';
+  if (balance <= 0) return '#ef4444';
+  if (balance < 2) return '#eab308';
+  return '#3b82f6';
+}
+
 function progressColor(pct: number) {
   if (pct >= 100) return '#991b1b';
   if (pct >= 90) return '#ef4444';
@@ -36,6 +43,10 @@ function formatResetTime(iso: string): string {
   const rel =
     h > 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
   return `${abs} (${rel})`;
+}
+
+function fmtCost(v: number) {
+  return `$${Math.abs(v) < 0.01 ? v.toFixed(6) : v.toFixed(2)}`;
 }
 
 const WindowBar = memo<{ hideCost: boolean; w: BudgetWindow }>(({ w, hideCost }) => (
@@ -71,12 +82,75 @@ WindowBar.displayName = 'WindowBar';
 const BudgetBadge = memo(() => {
   const { data, level } = useBudgetWarning();
 
-  if (!data?.windows?.length) return null;
+  if (!data) return null;
+
+  const isPAYG = data.billing_mode === 'payg';
+  const blocked = level === 'blocked' || data.blocked;
+  const hideCost = !!data.hide_cost;
+
+  // PAYG mode
+  if (isPAYG) {
+    const balance = data.payg?.balance ?? 0;
+    const icon = blocked ? '⛔' : '💳';
+    const color = paygBadgeColor(balance, blocked);
+    const label = fmtCost(balance);
+
+    const popoverContent = (
+      <Flexbox gap={4} style={{ minWidth: 200 }}>
+        {blocked && (
+          <Tag color="error" style={{ fontSize: 12, marginBottom: 4, padding: '2px 8px' }}>
+            ⛔ Credit Exhausted
+          </Tag>
+        )}
+        <Flexbox align="center" horizontal justify="space-between" style={{ fontSize: 13 }}>
+          <span style={{ fontWeight: 600 }}>Available Credit</span>
+          <span style={{ color: cssVar.colorTextDescription, fontFamily: 'monospace' }}>
+            {fmtCost(balance)}
+          </span>
+        </Flexbox>
+      </Flexbox>
+    );
+
+    return (
+      <ActionPopover
+        content={popoverContent}
+        minWidth={220}
+        title={
+          <Flexbox align="center" gap={6} horizontal>
+            <span>💳 PAYG</span>
+            <Tag color="blue" style={{ fontSize: 11, lineHeight: '18px', margin: 0, padding: '0 6px' }}>
+              Pay-As-You-Go
+            </Tag>
+          </Flexbox>
+        }
+      >
+        <Flexbox
+          align="center"
+          horizontal
+          gap={3}
+          style={{
+            background: cssVar.colorFillTertiary,
+            borderRadius: 12,
+            color,
+            cursor: 'pointer',
+            fontSize: 12,
+            fontWeight: 600,
+            height: 24,
+            paddingInline: '6px 8px',
+            userSelect: 'none',
+          }}
+        >
+          <span>{icon}</span>
+          <span>{label}</span>
+        </Flexbox>
+      </ActionPopover>
+    );
+  }
+
+  // Subscription mode — need windows
+  if (!data.windows?.length) return null;
 
   const maxPct = Math.max(...data.windows.map((w) => w.pct));
-  const blocked = level === 'blocked';
-  const hideCost = !!(data as any).hide_cost;
-
   const icon = blocked ? '⛔' : '🐝';
   const pctDisplay = `${Math.min(Math.round(maxPct), 100)}%`;
   const color = badgeColor(maxPct, blocked);
