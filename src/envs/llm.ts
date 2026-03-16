@@ -1,5 +1,4 @@
-/* eslint-disable sort-keys-fix/sort-keys-fix , typescript-sort-keys/interface */
-import { createEnv } from '@t3-oss/env-nextjs';
+import { createEnv } from '@t3-oss/env-core';
 import { z } from 'zod';
 
 export const getLLMConfig = () => {
@@ -222,6 +221,9 @@ export const getLLMConfig = () => {
 
       ENABLED_XIAOMIMIMO: z.boolean(),
       XIAOMIMIMO_API_KEY: z.string().optional(),
+
+      ENABLED_LONGCAT: z.boolean(),
+      LONGCAT_API_KEY: z.string().optional(),
     },
     runtimeEnv: {
       API_KEY_SELECT_MODE: process.env.API_KEY_SELECT_MODE,
@@ -442,6 +444,9 @@ export const getLLMConfig = () => {
 
       ENABLED_XIAOMIMIMO: !!process.env.XIAOMIMIMO_API_KEY,
       XIAOMIMIMO_API_KEY: process.env.XIAOMIMIMO_API_KEY,
+
+      ENABLED_LONGCAT: !!process.env.LONGCAT_API_KEY,
+      LONGCAT_API_KEY: process.env.LONGCAT_API_KEY,
     },
   });
 };

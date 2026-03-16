@@ -8,7 +8,7 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import useBusinessMenuItems from '@/business/client/features/User/useBusinessMenuItems';
+import getBusinessMenuItems from '@/business/client/features/User/getBusinessMenuItems';
 import { type MenuProps } from '@/components/Menu';
 import { DEFAULT_DESKTOP_HOTKEY_CONFIG } from '@/const/desktop';
 import { OFFICIAL_URL } from '@/const/url';
@@ -52,7 +52,7 @@ export const useMenu = () => {
     authSelectors.isLogin(s),
     authSelectors.isLoginWithAuth(s),
   ]);
-  const businessMenuItems = useBusinessMenuItems(isLogin);
+  const businessMenuItems = getBusinessMenuItems(isLogin);
   const { isIOS, isAndroid } = usePlatform();
 
   const downloadUrl = useMemo(() => {
@@ -83,13 +83,13 @@ export const useMenu = () => {
     },
   ];
 
-  const downloadClient: MenuProps['items'] = [
+  const getDesktopApp: MenuProps['items'] = [
     {
       icon: <Icon icon={Download} />,
-      key: 'download-client',
+      key: 'get-desktop-app',
       label: (
         <a href={downloadUrl} rel="noopener noreferrer" target="_blank">
-          {t('downloadClient')}
+          {t('getDesktopApp')}
         </a>
       ),
     },
@@ -134,7 +134,7 @@ export const useMenu = () => {
 
     ...(isLogin ? settings : []),
     ...businessMenuItems,
-    ...(!isDesktop ? downloadClient : []),
+    ...(!isDesktop ? getDesktopApp : []),
     ...data,
     ...(!hideDocs ? helps : []),
   ].filter(Boolean) as MenuProps['items'];

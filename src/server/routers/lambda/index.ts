@@ -9,9 +9,12 @@ import { topUpRouter } from '@/business/server/lambda-routers/topUp';
 import { publicProcedure, router } from '@/libs/trpc/lambda';
 
 import { agentRouter } from './agent';
+import { agentBotProviderRouter } from './agentBotProvider';
 import { agentCronJobRouter } from './agentCronJob';
 import { agentEvalRouter } from './agentEval';
+import { agentEvalExternalRouter } from './agentEvalExternal';
 import { agentGroupRouter } from './agentGroup';
+import { agentSkillsRouter } from './agentSkills';
 import { aiAgentRouter } from './aiAgent';
 import { aiChatRouter } from './aiChat';
 import { aiModelRouter } from './aiModel';
@@ -20,6 +23,7 @@ import { apiKeyRouter } from './apiKey';
 import { chunkRouter } from './chunk';
 import { comfyuiRouter } from './comfyui';
 import { configRouter } from './config';
+import { deviceRouter } from './device';
 import { documentRouter } from './document';
 import { exporterRouter } from './exporter';
 import { fileRouter } from './file';
@@ -30,6 +34,7 @@ import { homeRouter } from './home';
 import { imageRouter } from './image';
 import { importerRouter } from './importer';
 import { klavisRouter } from './klavis';
+import { knowledgeRouter } from './knowledge';
 import { knowledgeBaseRouter } from './knowledgeBase';
 import { marketRouter } from './market';
 import { messageRouter } from './message';
@@ -52,8 +57,11 @@ import { videoRouter } from './video';
 
 export const lambdaRouter = router({
   agent: agentRouter,
+  agentBotProvider: agentBotProviderRouter,
   agentCronJob: agentCronJobRouter,
   agentEval: agentEvalRouter,
+  agentEvalExternal: agentEvalExternalRouter,
+  agentSkills: agentSkillsRouter,
   aiAgent: aiAgentRouter,
   aiChat: aiChatRouter,
   aiModel: aiModelRouter,
@@ -62,6 +70,7 @@ export const lambdaRouter = router({
   chunk: chunkRouter,
   comfyui: comfyuiRouter,
   config: configRouter,
+  device: deviceRouter,
   document: documentRouter,
   exporter: exporterRouter,
   file: fileRouter,
@@ -74,6 +83,7 @@ export const lambdaRouter = router({
   image: imageRouter,
   importer: importerRouter,
   klavis: klavisRouter,
+  knowledge: knowledgeRouter,
   knowledgeBase: knowledgeBaseRouter,
   market: marketRouter,
   message: messageRouter,
@@ -93,13 +103,11 @@ export const lambdaRouter = router({
   userMemories: userMemoriesRouter,
   userMemory: userMemoryRouter,
   video: videoRouter,
-  /* eslint-disable sort-keys-fix/sort-keys-fix */
   accountDeletion: accountDeletionRouter,
   referral: referralRouter,
   spend: spendRouter,
   subscription: subscriptionRouter,
   topUp: topUpRouter,
-  /* eslint-enable sort-keys-fix/sort-keys-fix */
 });
 
 export type LambdaRouter = typeof lambdaRouter;

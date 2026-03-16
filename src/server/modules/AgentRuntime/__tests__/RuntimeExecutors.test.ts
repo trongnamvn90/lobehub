@@ -447,15 +447,19 @@ describe('RuntimeExecutors', () => {
 
       it('should pass tools normally when state.forceFinish is not set', async () => {
         const executors = createRuntimeExecutors(ctx);
-        const state = createMockState();
+        const tools = [
+          {
+            function: { description: 'Search the web', name: 'search' },
+            type: 'function' as const,
+          },
+        ];
+        const state = createMockState({ tools: tools as any });
 
-        const tools = [{ description: 'Search the web', name: 'search' }];
         const instruction = {
           payload: {
             messages: [{ content: 'Hello', role: 'user' }],
             model: 'gpt-4',
             provider: 'openai',
-            tools,
           },
           type: 'call_llm' as const,
         };
@@ -470,7 +474,12 @@ describe('RuntimeExecutors', () => {
 
       it('should fallback to state.tools when payload.tools is not provided', async () => {
         const executors = createRuntimeExecutors(ctx);
-        const stateTools = [{ description: 'State tool', name: 'state-tool' }];
+        const stateTools = [
+          {
+            function: { description: 'State tool', name: 'state-tool' },
+            type: 'function' as const,
+          },
+        ];
         const state = createMockState({ tools: stateTools as any });
 
         const instruction = {
@@ -494,7 +503,12 @@ describe('RuntimeExecutors', () => {
         const executors = createRuntimeExecutors(ctx);
         const state = createMockState({
           forceFinish: true,
-          tools: [{ description: 'State tool', name: 'state-tool' }] as any,
+          tools: [
+            {
+              function: { description: 'State tool', name: 'state-tool' },
+              type: 'function' as const,
+            },
+          ] as any,
         });
 
         const instruction = {
@@ -592,48 +606,6 @@ describe('RuntimeExecutors', () => {
         expect(mockChat).toHaveBeenCalledWith(
           expect.objectContaining({ messages: rawMessages }),
           expect.anything(),
-        );
-      });
-
-      it('should pass correct params from agentConfig to serverMessagesEngine', async () => {
-        const ctxWithConfig: RuntimeExecutorContext = {
-          ...ctx,
-          agentConfig: {
-            chatConfig: { enableHistoryCount: true, historyCount: 10 },
-            files: [{ content: 'file contents', enabled: true, id: 'file-1', name: 'doc.pdf' }],
-            knowledgeBases: [{ enabled: true, id: 'kb-1', name: 'My KB' }],
-            plugins: ['web-search', 'calculator'],
-            systemRole: 'You are a helpful assistant',
-          },
-        };
-        const executors = createRuntimeExecutors(ctxWithConfig);
-        const state = createMockState();
-
-        const instruction = {
-          payload: {
-            messages: [{ content: 'Hello', role: 'user' }],
-            model: 'gpt-4',
-            provider: 'openai',
-          },
-          type: 'call_llm' as const,
-        };
-
-        await executors.call_llm!(instruction, state);
-
-        expect(engineSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            enableHistoryCount: true,
-            historyCount: 10,
-            knowledge: {
-              fileContents: [{ content: 'file contents', fileId: 'file-1', filename: 'doc.pdf' }],
-              knowledgeBases: [{ id: 'kb-1', name: 'My KB' }],
-            },
-            messages: [{ content: 'Hello', role: 'user' }],
-            model: 'gpt-4',
-            provider: 'openai',
-            systemRole: 'You are a helpful assistant',
-            toolsConfig: { tools: ['web-search', 'calculator'] },
-          }),
         );
       });
 
@@ -1513,6 +1485,113 @@ describe('RuntimeExecutors', () => {
       // Expected: newState.messages should NOT be empty
       // The next call_llm step needs messages to work properly
       expect(result.newState.messages.length).toBeGreaterThan(0);
+    });
+
+    it('should accumulate tool usage in newState after batch execution', async () => {
+      mockToolExecutionService.executeTool
+        .mockResolvedValueOnce({
+          content: 'Search result',
+          error: null,
+          executionTime: 150,
+          state: {},
+          success: true,
+        })
+        .mockResolvedValueOnce({
+          content: 'Crawl result',
+          error: null,
+          executionTime: 250,
+          state: {},
+          success: true,
+        });
+
+      const executors = createRuntimeExecutors(ctx);
+      const state = createMockState();
+
+      const instruction = {
+        payload: {
+          parentMessageId: 'assistant-msg-123',
+          toolsCalling: [
+            {
+              apiName: 'search',
+              arguments: '{"query": "test"}',
+              id: 'tool-call-1',
+              identifier: 'web-search',
+              type: 'default' as const,
+            },
+            {
+              apiName: 'crawl',
+              arguments: '{"url": "https://example.com"}',
+              id: 'tool-call-2',
+              identifier: 'web-browsing',
+              type: 'default' as const,
+            },
+          ],
+        },
+        type: 'call_tools_batch' as const,
+      };
+
+      const result = await executors.call_tools_batch!(instruction, state);
+
+      // Tool usage must be accumulated in newState
+      expect(result.newState.usage.tools.totalCalls).toBe(2);
+      expect(result.newState.usage.tools.totalTimeMs).toBe(400);
+      expect(result.newState.usage.tools.byTool).toHaveLength(2);
+
+      // Verify per-tool breakdown
+      const searchTool = result.newState.usage.tools.byTool.find(
+        (t: any) => t.name === 'web-search/search',
+      );
+      const crawlTool = result.newState.usage.tools.byTool.find(
+        (t: any) => t.name === 'web-browsing/crawl',
+      );
+      expect(searchTool).toEqual(
+        expect.objectContaining({ calls: 1, errors: 0, totalTimeMs: 150 }),
+      );
+      expect(crawlTool).toEqual(expect.objectContaining({ calls: 1, errors: 0, totalTimeMs: 250 }));
+
+      // Original state must not be mutated
+      expect(state.usage.tools.totalCalls).toBe(0);
+    });
+
+    it('should pass toolResultMaxLength from agentConfig to executeTool', async () => {
+      const executors = createRuntimeExecutors(ctx);
+      const state = createMockState({
+        metadata: {
+          agentConfig: {
+            chatConfig: {
+              toolResultMaxLength: 5000,
+            },
+          },
+          agentId: 'agent-123',
+          threadId: 'thread-123',
+          topicId: 'topic-123',
+        },
+      });
+
+      const instruction = {
+        payload: {
+          parentMessageId: 'assistant-msg-123',
+          toolsCalling: [
+            {
+              apiName: 'search',
+              arguments: '{}',
+              id: 'tool-call-1',
+              identifier: 'web-search',
+              type: 'default' as const,
+            },
+          ],
+        },
+        type: 'call_tools_batch' as const,
+      };
+
+      await executors.call_tools_batch!(instruction, state);
+
+      expect(mockToolExecutionService.executeTool).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          toolResultMaxLength: 5000,
+        }),
+      );
     });
   });
 

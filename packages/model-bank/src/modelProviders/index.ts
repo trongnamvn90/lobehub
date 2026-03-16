@@ -34,6 +34,7 @@ import InternLMProvider from './internlm';
 import JinaProvider from './jina';
 import LMStudioProvider from './lmstudio';
 import LobeHubProvider from './lobehub';
+import LongCatProvider from './longcat';
 import MinimaxProvider from './minimax';
 import MistralProvider from './mistral';
 import ModelScopeProvider from './modelscope';
@@ -204,6 +205,7 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   ZenMuxProvider,
   StraicoProvider,
   XiaomiMiMoProvider,
+  LongCatProvider,
 ];
 
 export const filterEnabledModels = (provider: ModelProviderCard) => {
@@ -211,7 +213,9 @@ export const filterEnabledModels = (provider: ModelProviderCard) => {
 };
 
 export const isProviderDisableBrowserRequest = (id: string) => {
-  const provider = DEFAULT_MODEL_PROVIDER_LIST.find((v) => v.id === id && v.disableBrowserRequest);
+  const provider = DEFAULT_MODEL_PROVIDER_LIST.find(
+    (v) => v.id === id && (v.disableBrowserRequest || v.settings?.disableBrowserRequest),
+  );
   return !!provider;
 };
 
@@ -247,6 +251,7 @@ export { default as InternLMProviderCard } from './internlm';
 export { default as JinaProviderCard } from './jina';
 export { default as LMStudioProviderCard } from './lmstudio';
 export { default as LobeHubProviderCard } from './lobehub';
+export { default as LongCatProviderCard } from './longcat';
 export { default as MinimaxProviderCard } from './minimax';
 export { default as MistralProviderCard } from './mistral';
 export { default as ModelScopeProviderCard } from './modelscope';

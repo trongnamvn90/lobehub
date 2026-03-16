@@ -4,6 +4,7 @@ import {
   DropdownMenuPositioner,
   DropdownMenuRoot,
   DropdownMenuTrigger,
+  stopPropagation,
   TooltipGroup,
 } from '@lobehub/ui';
 import { memo, useCallback, useState } from 'react';
@@ -15,7 +16,6 @@ import { type ModelSwitchPanelProps } from './types';
 const ModelSwitchPanel = memo<ModelSwitchPanelProps>(
   ({
     children,
-    extraControls,
     model: modelProp,
     onModelChange,
     onOpenChange,
@@ -38,12 +38,13 @@ const ModelSwitchPanel = memo<ModelSwitchPanelProps>(
     return (
       <TooltipGroup>
         <DropdownMenuRoot open={isOpen} onOpenChange={handleOpenChange}>
-          <DropdownMenuTrigger openOnHover={openOnHover}>{children}</DropdownMenuTrigger>
+          <DropdownMenuTrigger className={styles.trigger} openOnHover={openOnHover}>
+            {children}
+          </DropdownMenuTrigger>
           <DropdownMenuPortal>
             <DropdownMenuPositioner hoverTrigger={openOnHover} placement={placement}>
-              <DropdownMenuPopup className={styles.container}>
+              <DropdownMenuPopup className={styles.container} onKeyDown={stopPropagation}>
                 <PanelContent
-                  extraControls={extraControls}
                   model={modelProp}
                   provider={providerProp}
                   onModelChange={onModelChange}

@@ -3,14 +3,13 @@ import { Flexbox } from '@lobehub/ui';
 import { type FC, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { navigateToDesktopOnboarding } from '@/app/[variants]/(desktop)/desktop-onboarding/navigation';
-import { clearDesktopOnboardingCompleted } from '@/app/[variants]/(desktop)/desktop-onboarding/storage';
-import { DesktopOnboardingScreen } from '@/app/[variants]/(desktop)/desktop-onboarding/types';
 import BusinessPanelContent from '@/business/client/features/User/BusinessPanelContent';
 import BrandWatermark from '@/components/BrandWatermark';
 import Menu from '@/components/Menu';
 import UsagePanel from '@/components/UsagePanel';
 import { isDesktop } from '@/const/version';
+import { navigateToDesktopOnboarding } from '@/routes/(desktop)/desktop-onboarding/navigation';
+import { DesktopOnboardingScreen } from '@/routes/(desktop)/desktop-onboarding/types';
 import { useUserStore } from '@/store/user';
 import { authSelectors } from '@/store/user/selectors';
 
@@ -41,7 +40,6 @@ const PanelContent: FC<{ closePopover: () => void }> = ({ closePopover }) => {
       } catch (error) {
         console.error(error);
       } finally {
-        clearDesktopOnboardingCompleted();
         signOut();
         navigateToDesktopOnboarding(DesktopOnboardingScreen.Login);
       }
